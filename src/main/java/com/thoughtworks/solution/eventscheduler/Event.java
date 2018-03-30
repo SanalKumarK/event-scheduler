@@ -30,7 +30,15 @@ class Event {
 	public int getDuration() {
 		return duration;
 	}
-		
+	
+	public boolean isLightning() {
+		return lightning;
+	}
+	
+	public boolean isBreakEvent() {
+		return breakEvent;
+	}
+	
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

@@ -1,5 +1,7 @@
 package com.thoughtworks.solution.eventscheduler;
 
+import junit.framework.Assert;
+
 public class EventBuilder {
 	
 	private EventBuilder() {}
@@ -8,6 +10,9 @@ public class EventBuilder {
 	public static final String NETWORKING = "Networking Event";
 	
 	public static Event createEvent(String type) {
+		
+		Assert.assertNotNull("Type should not be null", type);
+		
 		Event event = null;		
 		switch(type) {
 			case LUNCH :  
@@ -20,7 +25,7 @@ public class EventBuilder {
 				
 			default :
 				break;
-		}		
+		}
 		return event;
 	}
 }

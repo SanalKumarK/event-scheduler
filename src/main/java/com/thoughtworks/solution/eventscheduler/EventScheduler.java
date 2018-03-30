@@ -6,45 +6,67 @@ import java.util.List;
 public class EventScheduler {	
 	
 	public List<String> schedule(List<String> inputs) {
-		ArrayList<Event> events = new ArrayList<>();        
-        for (String input : inputs) {
-			events.add(EventSchedulerUtil.convertToEvent(input));
+		
+		List<String> tracksList = new ArrayList<>();;
+		
+		if(inputs == null || inputs.isEmpty()) {			
+			return tracksList;
+		}		
+		
+		List<Event> events = new ArrayList<>(); 
+        for (String input : inputs) {        	
+        	Event event = EventSchedulerUtil.convertToEvent(input);
+        	if(event != null) {
+        		events.add(event);	
+        	}
 		}
-        
-        List<Track> tracks = scheduleEvents(events);               
-        
-        return EventSchedulerUtil.convertToScheduledChart(tracks);        
+                
+        if(!events.isEmpty()) {
+        	List<Track> tracks = scheduleEvents(events);
+        	if(!tracks.isEmpty()) {
+        		tracksList = EventSchedulerUtil.convertToScheduledChart(tracks);	
+            }
+        }
+        return tracksList;
 	}
 	
-	public List<Track> scheduleEvents(ArrayList<Event> tempEvents) {
+	public List<Track> scheduleEvents(List<Event> tempEvents) {
         
-        List<Track> tracks = new ArrayList();
+        List<Track> tracks = new ArrayList<>();
         while(!tempEvents.isEmpty()) {
         	Track track = new Track();
-        	Track mngTrack = getScheduleEvents(tempEvents, 180);
-        	track.events.addAll(mngTrack.events);
-        	track.totalDuration += mngTrack.totalDuration;
+        	Track mngTrack = getScheduleEvents(tempEvents, App.MORNING_SESSION_DURATION);
+        	track.getEvents().addAll(mngTrack.getEvents());
+        	track.setTotalDuration(track.getTotalDuration() + mngTrack.getTotalDuration());
         	Event lunch = EventBuilder.createEvent(EventBuilder.LUNCH);
-        	track.events.add(lunch);
-        	track.totalDuration += lunch.getDuration();        	        	
+        	track.getEvents().add(lunch);
+        	track.setTotalDuration(track.getTotalDuration() + lunch.getDuration());        	        	
         	
-        	EventSchedulerUtil.trimEvents(tempEvents, track.events);        	
+        	EventSchedulerUtil.trimEvents(tempEvents, track.getEvents());        	
         	
-        	Track evenTrack = getScheduleEvents(tempEvents, 240);
-        	track.events.addAll(evenTrack.events);
-        	track.totalDuration += evenTrack.totalDuration;
+        	Track evenTrack = getScheduleEvents(tempEvents, App.AFTERNOON_SESSION_DURATION);
+        	track.getEvents().addAll(evenTrack.getEvents());
+        	track.setTotalDuration(track.getTotalDuration() + evenTrack.getTotalDuration());
         	Event networking = EventBuilder.createEvent(EventBuilder.NETWORKING);
-        	track.events.add(networking);
-        	track.totalDuration += networking.getDuration();
+        	track.getEvents().add(networking);
+        	track.setTotalDuration (track.getTotalDuration() + networking.getDuration());
         	
         	tracks.add(track);
         	
-        	EventSchedulerUtil.trimEvents(tempEvents, evenTrack.events);
+        	EventSchedulerUtil.trimEvents(tempEvents, evenTrack.getEvents());
         }
         return tracks;
 	}
 	
-	private Track getScheduleEvents(List<Event> events, int reqDuration) {
+	public Track getScheduleEvents(List<Event> events, int reqDuration) {
+		if(events == null || events.isEmpty()) {
+			return new Track();
+		} else {
+			return findEvents(events, reqDuration);
+		}
+	}
+	
+	private Track findEvents(List<Event> events, int reqDuration) {
 		Track result = new Track();
 		
 		if(reqDuration == 0) {
@@ -52,22 +74,22 @@ public class EventScheduler {
 		} else {
 			Event curEvent = events.get(0);
 			if(curEvent.getDuration() == reqDuration) {
-				result.events.add(curEvent);
-				result.totalDuration = reqDuration;
+				result.getEvents().add(curEvent);
+				result.setTotalDuration (reqDuration);
 			} else {
 				List<Event> remainingEvents = EventSchedulerUtil.trimEvents(events, curEvent);
 				if(!remainingEvents.isEmpty()) {
-					Track incEvent = getScheduleEvents(remainingEvents, reqDuration-curEvent.getDuration());
-					Track excEvent = getScheduleEvents(remainingEvents, reqDuration);
+					Track incEvent = findEvents(remainingEvents, reqDuration-curEvent.getDuration());
+					Track excEvent = findEvents(remainingEvents, reqDuration);
 										
-					int incDur = incEvent.totalDuration + curEvent.getDuration();
-					int excDur =  excEvent.totalDuration ;
+					int incDur = incEvent.getTotalDuration() + curEvent.getDuration();
+					int excDur =  excEvent.getTotalDuration();
 					
 					int bestFit = Math.min(Math.max(incDur, excDur), reqDuration);
 					
 					if(incDur == bestFit) {
-						incEvent.events.add(0, curEvent);
-						incEvent.totalDuration = incDur;
+						incEvent.getEvents().add(0, curEvent);
+						incEvent.setTotalDuration (incDur);
 						return incEvent;
 					}
 					
@@ -78,8 +100,8 @@ public class EventScheduler {
 					//If last element, check if the event duration is less than the required duration,
 					//if so add it to the result
 					if(curEvent.getDuration() < reqDuration) {
-						result.events.add(curEvent);
-						result.totalDuration = curEvent.getDuration();
+						result.getEvents().add(curEvent);
+						result.setTotalDuration (curEvent.getDuration());
 						return result;	
 					}
 				}

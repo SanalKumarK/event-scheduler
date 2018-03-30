@@ -1,10 +1,23 @@
 package com.thoughtworks.solution.eventscheduler;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Track {
-	public ArrayList<Event> events = new ArrayList<>();
-	public int totalDuration;
+	private List<Event> events = new ArrayList<Event>();
+	private int totalDuration;
+	
+	public List<Event> getEvents() {
+		return events;
+	}
+	
+	public int getTotalDuration() {
+		return totalDuration;
+	}
+	
+	public void setTotalDuration(int totalDuration) {
+		this.totalDuration = totalDuration;
+	}
 	
 	@Override
 	public String toString() {

@@ -15,6 +15,9 @@ public class App
 
 	public static final String TIME_UNIT = "mins";
 	
+	public static final int MORNING_SESSION_DURATION = 180;
+	public static final int AFTERNOON_SESSION_DURATION = 240;
+	
     public static void main( String[] args )
     {        
         EventScheduler scheduler = new EventScheduler();
@@ -29,8 +32,9 @@ public class App
     }
     
     private static ArrayList<String> getInputs() {
-    	ArrayList<String> inputs = new ArrayList<>();
+    	ArrayList<String> inputs = new ArrayList<String>();
     	
+    	inputs.add("");
         inputs.add("Writing Fast Tests Against Enterprise Rails 60min");
         inputs.add("Overdoing it in Python 45min");
         inputs.add("Lua for the Masses 30min");
